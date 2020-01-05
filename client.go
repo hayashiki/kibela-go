@@ -25,6 +25,18 @@ type Client struct {
 	Note *NoteService
 }
 
+type Payload struct {
+	Query     string      `json:"query"`
+	Variables interface{} `json:"variables,omitempty"`
+}
+
+type Errors []error
+
+type Response struct {
+	Errors Errors          `json:"errors,omitempty"`
+	Data   json.RawMessage `json:"data,omitempty"`
+}
+
 type SuccessResponse struct {
 	Success bool `json:"success"`
 }
@@ -95,7 +107,6 @@ func (c *Client) Do(r *http.Request, v interface{}) (*http.Response, error) {
 
 	dec := json.NewDecoder(resp.Body)
 	err = dec.Decode(&v)
-	log.Printf("log dec %v", v)
 
 	if err != nil {
 		return resp, err

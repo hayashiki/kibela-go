@@ -3,7 +3,7 @@ package main
 import (
 	"log"
 
-	"github.com/hayashiki/kibela-go/kibela"
+	"github.com/hayashiki/kibela-go"
 )
 
 func main() {
@@ -12,7 +12,8 @@ func main() {
 		log.Fatal(err)
 		return
 	}
-	resp, err := client.Note.Create()
+	resp, err := client.Note.Search("aaa")
+	// resp, err := client.Note.GetAll()
 	if err != nil {
 		log.Fatal(err)
 		return
