@@ -9,12 +9,10 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
-	"os"
 )
 
 const (
 	defaultBaseURL = "https://%s.kibe.la/api/v1"
-	envKibelaTOKEN = "KIBELA_TOKEN"
 )
 
 type Client struct {
@@ -41,9 +39,7 @@ type SuccessResponse struct {
 	Success bool `json:"success"`
 }
 
-func NewClient(httpClient *http.Client, team string) (*Client, error) {
-
-	accessToken := os.Getenv(envKibelaTOKEN)
+func NewClient(httpClient *http.Client, team, accessToken string) (*Client, error) {
 
 	if httpClient == nil {
 		httpClient = http.DefaultClient
@@ -74,7 +70,6 @@ func (c *Client) NewRequest(method string, body interface{}) (*http.Request, err
 	}
 
 	var buf io.ReadWriter
-	log.Printf("log body %v", body)
 
 	if body != nil {
 		b := new(bytes.Buffer)

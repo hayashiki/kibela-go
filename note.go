@@ -3,8 +3,6 @@ package kibela
 import (
 	"encoding/json"
 	"fmt"
-	"log"
-	"strings"
 )
 
 type NoteService struct {
@@ -12,15 +10,11 @@ type NoteService struct {
 }
 
 type Note struct {
-	// ID `json:"id"`
 	Title string `json"title"`
-	// Content string `json"content"`
 }
 
 type SearchResult struct {
-	// ID `json:"id"`
 	Title string `json:"title"`
-	// Content string `json"content"`
 }
 
 func (s *NoteService) GetAll() ([]*Note, error) {
@@ -28,10 +22,6 @@ func (s *NoteService) GetAll() ([]*Note, error) {
 	pa := Payload{
 		Query: listNoteQuery(),
 	}
-
-	pa.Query = strings.TrimSpace(pa.Query)
-
-	log.Printf("log pa %v", pa)
 
 	req, err := s.client.NewRequest("POST", pa)
 	if err != nil {
@@ -45,18 +35,10 @@ func (s *NoteService) GetAll() ([]*Note, error) {
 	}
 
 	var res Response
-
-	// noteResp := interface{}
-	resp, err := s.client.Do(req, &res)
-
-	log.Printf("log res %v", resp)
+	_, err = s.client.Do(req, &res)
 
 	if err := json.Unmarshal(res.Data, &result); err != nil {
 		return nil, err
-	}
-
-	for _, note := range result.Notes.Nodes {
-		log.Printf("log res %v", note.Title)
 	}
 
 	if err != nil {
@@ -90,8 +72,6 @@ func (s *NoteService) Search(query string) ([]*SearchResult, error) {
 		Query: searchQuery,
 	}
 
-	// pa.Query = strings.TrimSpace(pa.Query)
-
 	req, err := s.client.NewRequest("POST", payload)
 	if err != nil {
 		return nil, err
@@ -104,16 +84,10 @@ func (s *NoteService) Search(query string) ([]*SearchResult, error) {
 	}
 
 	var res Response
-	resp, err := s.client.Do(req, &res)
-
-	log.Printf("log resp %v", resp)
+	_, err = s.client.Do(req, &res)
 
 	if err := json.Unmarshal(res.Data, &result); err != nil {
 		return nil, err
-	}
-
-	for _, note := range result.Search.Nodes {
-		log.Printf("log res %v", note.Title)
 	}
 
 	if err != nil {
@@ -122,14 +96,3 @@ func (s *NoteService) Search(query string) ([]*SearchResult, error) {
 
 	return result.Search.Nodes, err
 }
-
-// func listNoteQuery(num int, folderID ID, hasLimit bool) string {
-// 	return fmt.Sprintf(`{
-// 		notes(%s) {
-// 			nodes {
-// 				id
-// 				updatedAt
-// 			}
-// 		}
-// 	}`, buildNotesArg(num, folderID, "", hasLimit))
-// }

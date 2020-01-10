@@ -2,22 +2,27 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/hayashiki/kibela-go"
 )
 
 func main() {
-	client, err := kibela.NewClient(nil, "hayashiki")
+	team := os.Getenv("KIBELA_TEAM")
+	accessToken := os.Getenv("KIBELA_TOKEN")
+
+	client, err := kibela.NewClient(nil, team, accessToken)
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
-	resp, err := client.Note.Search("aaa")
-	// resp, err := client.Note.GetAll()
+	notes, err := client.Note.Search(os.Args[1])
 	if err != nil {
 		log.Fatal(err)
 		return
 	}
 
-	log.Printf("log %v", resp)
+	for _, note := range notes {
+		log.Printf("log %v", note.Title)
+	}
 }
