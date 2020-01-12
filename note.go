@@ -10,11 +10,14 @@ type NoteService struct {
 }
 
 type Note struct {
+	Id    string `json"id"`
 	Title string `json"title"`
+	Url   string `json"url"`
 }
 
 type SearchResult struct {
-	Title string `json:"title"`
+	Title    string `json:"title"`
+	Document Note   `json:"document"`
 }
 
 func (s *NoteService) GetAll() ([]*Note, error) {
@@ -62,8 +65,15 @@ func (s *NoteService) Search(query string) ([]*SearchResult, error) {
 
 	searchQuery := fmt.Sprintf(`query {
 		search(first: 10, query: "%s") {
-			nodes {
+			nodes {			
 				title
+        document {
+          ... on Note {
+            id
+            title
+						url
+          }
+				}				
 			}
 		}				
 	}`, query)
