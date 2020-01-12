@@ -10,9 +10,9 @@ type NoteService struct {
 }
 
 type Note struct {
-	Id    string `json"id"`
+	ID    string `json"id"`
 	Title string `json"title"`
-	Url   string `json"url"`
+	URL   string `json"url"`
 }
 
 type SearchResult struct {
