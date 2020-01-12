@@ -1,3 +1,3 @@
-module github.com/hayashiki/kibela-go
+module kibela-go
 
 go 1.13
