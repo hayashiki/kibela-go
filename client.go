@@ -1,6 +1,7 @@
 package kibela
 
 import (
+	"io/ioutil"
 	"log"
 	"net/http"
 	"net/url"
@@ -21,6 +22,7 @@ type Client struct {
 	Client      *http.Client
 
 	Note *NoteService
+	Attachment *AttachmentService
 }
 
 type Payload struct {
@@ -59,6 +61,7 @@ func NewClient(httpClient *http.Client, team, accessToken string) (*Client, erro
 	}
 
 	c.Note = &NoteService{client: c}
+	c.Attachment = &AttachmentService{client: c}
 
 	return c, nil
 }
@@ -107,4 +110,65 @@ func (c *Client) Do(r *http.Request, v interface{}) (*http.Response, error) {
 		return resp, err
 	}
 	return resp, nil
+}
+
+func (c Client) GraphQL(query string, variables map[string]interface{}, data interface{}) error {
+	reqBody, err := json.Marshal(map[string]interface{}{"query": query, "variables": variables})
+	if err != nil {
+		return err
+	}
+
+	req, err := http.NewRequest(http.MethodPost, c.BaseURL.String(), bytes.NewBuffer(reqBody))
+	if err != nil {
+		return err
+	}
+
+	req.Header.Set("Content-Type", "application/json; charset=utf-8")
+	req.Header.Set("Accept", "application/json")
+	req.Header.Set("User-Agent", "hayashiki")
+	log.Print(c.BaseURL.String())
+	log.Print(c.AccessToken)
+	log.Print(query)
+	log.Print(variables)
+
+
+	req.Header.Add("Authorization", fmt.Sprintf("Bearer %s", c.AccessToken))
+
+	resp, err := c.Client.Do(req)
+	if err != nil {
+		log.Print(err)
+		return err
+	}
+	defer resp.Body.Close()
+
+	return handleResponse(resp, data)
+}
+
+type graphQLResponse struct {
+	Data   interface{}
+	Errors []GraphQLError
+}
+
+type GraphQLError struct {
+	Type    string
+	Path    []string
+	Message string
+}
+
+type GraphQLErrorResponse struct {
+	Errors []GraphQLError
+}
+
+func handleResponse(resp *http.Response, data interface{}) error {
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return err
+	}
+
+	gr := &graphQLResponse{Data: data}
+	err = json.Unmarshal(body, &gr)
+	if err != nil {
+		return err
+	}
+	return nil
 }

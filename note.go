@@ -13,6 +13,7 @@ type Note struct {
 	ID    string `json"id"`
 	Title string `json"title"`
 	URL   string `json"url"`
+	Content string `json"content"`
 }
 
 type SearchResult struct {
@@ -105,4 +106,26 @@ func (s *NoteService) Search(query string) ([]*SearchResult, error) {
 	}
 
 	return result.Search.Nodes, err
+}
+
+func (s *NoteService) Get(id string) (*Note, error) {
+	const query = `
+query ($id: ID!) {
+  note(id: $id) {
+    id
+    title
+    url
+    content
+  }
+}
+`
+	type response struct {
+		Note *Note `json:"note"`
+	}
+	variables := map[string]interface{}{
+		"id": id,
+	}
+	var resp response
+	err := s.client.GraphQL(query, variables, &resp)
+	return resp.Note, err
 }
